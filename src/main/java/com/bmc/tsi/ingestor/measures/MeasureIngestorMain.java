@@ -18,6 +18,10 @@ import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+
 public class MeasureIngestorMain {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(MeasureIngestorMain.class);
@@ -185,19 +189,23 @@ public class MeasureIngestorMain {
 
 		@Override
 		public void run() {
-			
+
 			Map<String, TreeMap<String, TreeSet<Measure>>> instanceMap = sourceMetricMap.get(sourceID);
 
-			try {
-				for (String instanceEntry : instanceMap.keySet()) {
-					Map<String, TreeSet<Measure>> metricInstanceMap = instanceMap.get(instanceEntry);
-					for (String metricName : metricInstanceMap.keySet()) {
-						List<List<Object>> payload = getPaylod(metricName,metricInstanceMap.get(metricName));
-					}				}
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+			for (String instanceEntry : instanceMap.keySet()) {
+				Map<String, TreeSet<Measure>> metricInstanceMap = instanceMap.get(instanceEntry);
+				for (String metricName : metricInstanceMap.keySet()) {
+					List<List<Object>> payload = getPaylod(metricName, metricInstanceMap.get(metricName));
+					// This need to be converted to JSON
+					try {
+						getJson(payload);
+					} catch (JsonProcessingException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+				}
 			}
+		}
 
 		private List<List<Object>> getPaylod(String metricID, Set<Measure> measures) {
 			List<List<Object>> measuresPayload = new ArrayList<>();
@@ -217,4 +225,12 @@ public class MeasureIngestorMain {
 			return measuresPayload;
 		}
 
+		private String getJson(Object object) throws JsonProcessingException {
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.enable(SerializationFeature.INDENT_OUTPUT);
+			String str = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(object);
+			System.out.println("REQUEST BODY : :" + str);
+			return str;
+		}
+	}
 }
