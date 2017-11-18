@@ -45,8 +45,11 @@ public class MeasureIngestorMain {
 				+ (double) (Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) / (1024 * 1024)
 				+ "  Time(ms) " + (end - start));
 
-		main.writeBackMaster();
-		main.writeBackData();
+		// Uncomment this to write the files back to verify they are loaded
+		// properly;
+		/*
+		 * main.writeBackMaster(); main.writeBackData();
+		 */
 	}
 
 	private void loadMaster(String fileName) {
